@@ -9,14 +9,18 @@
   
   <style>
     :root { --bim-green: #0A7036; --bim-green-dark: #054a22; --neutral-bg: #f4f6f8; }
-    body { background-color: var(--neutral-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333333; padding-top: 30px; }
+    body { background-color: var(--neutral-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333333; padding-top: 20px; }
     .main-card { border: none; border-top: 6px solid var(--bim-green); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); background: #ffffff; }
     .logo-box img { max-height: 45px; margin-bottom: 12px; }
-    .main-title { color: var(--bim-green); font-weight: 800; font-size: 1.5rem; letter-spacing: 0.5px; }
+    .main-title { color: var(--bim-green); font-weight: 800; font-size: 1.4rem; letter-spacing: 0.5px; }
     .btn-bim { background-color: var(--bim-green); color: white; border: none; font-weight: 600; transition: all 0.3s ease; }
     .btn-bim:hover { background-color: var(--bim-green-dark); color: white; }
     .btn-bim:disabled { background-color: #a3cca9; color: #ffffff; }
     
+    /* Giao diện Toolbar */
+    .toolbar-icons .btn { border-radius: 50%; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-left: 8px; transition: all 0.2s;}
+    .toolbar-icons .btn:hover { transform: translateY(-2px); }
+
     .search-wrapper { position: relative; }
     .suggestion-container { position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border-radius: 0 0 8px 8px; background: #ffffff; border: 1px solid #ced4da; border-top: none; }
     .suggestion-row { padding: 12px 15px; cursor: pointer; transition: background 0.2s ease; display: flex; justify-content: space-between; align-items: center;}
@@ -31,64 +35,73 @@
     .video-mirror { transform: scaleX(-1); }
     
     .btn-switch-cam { position: absolute; top: 10px; right: 10px; z-index: 10; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.3s; }
-    .btn-switch-cam:hover { background: rgba(0,0,0,0.8); transform: scale(1.1); }
     
     #preview-container { width: 100%; text-align: center; display: none; }
     #preview-img { max-width: 100%; max-height: 400px; border-radius: 8px; border: 3px solid var(--bim-green); object-fit: contain; }
     #canvas-capture { display: none; }
 
-    ::-webkit-scrollbar { width: 6px; }
+    /* Custom Table Data */
+    .table-data th { background: #f1f8f4; color: var(--bim-green-dark); font-size: 0.85rem; white-space: nowrap;}
+    .table-data td { vertical-align: middle; font-size: 0.9rem; }
+    .img-thumbnail-custom { width: 45px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; padding: 2px; background: white;}
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
   </style>
 </head>
 <body>
 
   <div id="loading" class="loading-overlay">
     <div class="spinner-border text-success" role="status" style="width: 2.5rem; height: 2.5rem;"></div>
-    <h6 class="mt-3 text-secondary" id="loading-text">Đang tải dữ liệu nhân sự...</h6>
+    <h6 class="mt-3 text-secondary" id="loading-text">Đang tải dữ liệu hệ thống...</h6>
   </div>
 
   <div class="container pb-5">
     <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
+      <div class="col-md-10 col-lg-8">
         <div class="card main-card p-4">
           
-          <div class="text-center mb-4">
-            <div class="logo-box"><img src="https://i.postimg.cc/LYY6ZpCQ/logobe.png" alt="BIM Group Logo"></div>
-            <h2 class="main-title text-uppercase">Upload Chấm công khuôn mặt</h2>
+          <!-- Thanh công cụ (Toolbar Icons) -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="logo-box m-0"><img src="https://i.postimg.cc/LYY6ZpCQ/logobe.png" alt="BIM Group"></div>
+            <div class="toolbar-icons">
+              <button class="btn btn-outline-secondary d-none" id="btn-back" onclick="setMode('search')" title="Quay lại Trang chủ">
+                <i class="fa-solid fa-arrow-left"></i>
+              </button>
+              <button class="btn btn-outline-primary" id="btn-add" onclick="setMode('add')" title="Thêm nhân sự mới">
+                <i class="fa-solid fa-user-plus"></i>
+              </button>
+              <button class="btn btn-outline-info" id="btn-list" onclick="promptListMode()" title="Xem danh sách">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
           </div>
           
-          <!-- Nút Chuyển Chế Độ -->
-          <div class="text-end mb-3">
-            <button class="btn btn-sm btn-outline-primary fw-bold" onclick="toggleMode()" id="btn-toggle-mode">
-              <i class="fa-solid fa-user-plus me-1"></i>Thêm nhân sự mới
-            </button>
+          <div class="text-center mb-3">
+            <h2 class="main-title text-uppercase" id="main-heading">Upload Chấm Công</h2>
           </div>
-
           <hr class="text-muted opacity-25 mb-4">
           
-          <!-- ================= CHẾ ĐỘ 1: TÌM KIẾM ================= -->
+          <!-- ================= 1. CHẾ ĐỘ TÌM KIẾM (MẶC ĐỊNH) ================= -->
           <div id="mode-search-section">
             <div class="mb-3 search-wrapper">
-              <label class="form-label fw-bold text-secondary small text-uppercase"><i class="fa-solid fa-search me-2"></i>Tìm kiếm (Nhập MVN hoặc Họ tên)</label>
+              <label class="form-label fw-bold text-secondary small text-uppercase"><i class="fa-solid fa-search me-2"></i>Tìm kiếm (MVN hoặc Họ tên)</label>
               <div class="input-group">
-                <input type="text" id="userId" class="form-control form-control-lg bg-light" placeholder="Nhập mã hoặc tên không dấu..." autocomplete="off" oninput="handleSearchInput(this.value)">
+                <input type="text" id="userId" class="form-control form-control-lg bg-light border-0 shadow-sm" placeholder="Nhập từ khóa không dấu..." autocomplete="off" oninput="handleSearchInput(this.value)">
               </div>
               <div id="suggestion-box" class="suggestion-container d-none shadow-sm"></div>
               <div id="search-feedback" class="mt-2 text-center"></div>
             </div>
 
-            <div class="mb-4" id="missing-list-wrapper">
-              <button class="btn btn-sm btn-outline-secondary w-100 mb-2" type="button" onclick="toggleMissingList()">
-                <i class="fa-solid fa-users-viewfinder me-2"></i>Hiển thị danh sách chưa có ảnh <span id="missing-count" class="badge bg-danger ms-1">0</span>
+            <div class="mb-4 text-center">
+              <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" type="button" onclick="toggleMissingList()">
+                <i class="fa-solid fa-users-viewfinder me-2"></i>Xem nhân viên chưa có ảnh <span id="missing-count" class="badge bg-danger ms-1">0</span>
               </button>
-              <div id="missing-list-container" class="d-none border rounded-3 p-2 bg-light shadow-sm" style="max-height: 200px; overflow-y: auto;">
-              </div>
+              <div id="missing-list-container" class="d-none border rounded-3 p-2 bg-light shadow-sm mt-2 text-start" style="max-height: 200px; overflow-y: auto;"></div>
             </div>
             
-            <div class="row g-3 mb-4 p-3 rounded-3 bg-light border border-success border-opacity-25" id="info-section">
+            <div class="row g-3 mb-4 p-3 rounded-3 bg-light border border-success border-opacity-25">
               <div class="col-6">
                 <label class="small text-muted d-block mb-1">Họ và Tên</label>
                 <span id="txt-name" class="fw-bold text-dark">-</span>
@@ -100,52 +113,77 @@
             </div>
           </div>
 
-          <!-- ================= CHẾ ĐỘ 2: THÊM MỚI ================= -->
-          <div id="mode-add-section" class="d-none mb-4 p-3 rounded-3 bg-light border border-primary border-opacity-25">
-            <h6 class="text-primary mb-3 fw-bold"><i class="fa-solid fa-user-plus me-2"></i>Khai báo nhân sự mới</h6>
+          <!-- ================= 2. CHẾ ĐỘ THÊM MỚI ================= -->
+          <div id="mode-add-section" class="d-none mb-4 p-4 rounded-3 bg-white shadow-sm border border-primary border-opacity-25">
             <div class="mb-3">
               <label class="form-label fw-bold text-secondary small">Mã nhân viên (MNV) <span class="text-danger">*</span></label>
-              <input type="text" id="new-userId" class="form-control" placeholder="VD: BIM12345" oninput="validateNewUser()">
+              <input type="text" id="new-userId" class="form-control bg-light" placeholder="VD: BIM12345" oninput="validateNewUser()">
             </div>
             <div class="mb-2">
               <label class="form-label fw-bold text-secondary small">Họ và tên <span class="text-danger">*</span></label>
-              <input type="text" id="new-userName" class="form-control" placeholder="VD: Nguyễn Văn A" oninput="validateNewUser()">
+              <input type="text" id="new-userName" class="form-control bg-light" placeholder="VD: Nguyễn Văn A" oninput="validateNewUser()">
+            </div>
+          </div>
+
+          <!-- ================= 3. CHẾ ĐỘ DANH SÁCH (BẢO MẬT) ================= -->
+          <div id="mode-list-section" class="d-none">
+            <div class="mb-3">
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="listSearch" class="form-control border-start-0" placeholder="Lọc nhanh danh sách..." oninput="filterList()">
+              </div>
+            </div>
+            <div class="table-responsive rounded-3 border shadow-sm" style="max-height: 500px; overflow-y: auto;">
+              <table class="table table-hover table-data mb-0">
+                <thead class="position-sticky top-0 shadow-sm z-1">
+                  <tr>
+                    <th class="text-center">Hình ảnh</th>
+                    <th>MNV</th>
+                    <th>Họ tên</th>
+                    <th>Họ tên không dấu</th>
+                    <th class="text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="list-tbody">
+                  <!-- JS sẽ chèn dữ liệu vào đây -->
+                </tbody>
+              </table>
             </div>
           </div>
 
 
-          <!-- ================= KHU VỰC CAMERA ================= -->
-          <div class="mb-4 text-center">
-            <label class="form-label fw-bold text-secondary small text-uppercase d-block"><i class="fa-solid fa-camera me-2"></i>Chụp ảnh chân dung trực tiếp</label>
-            <div id="photo-label-status" class="small text-muted mb-2"></div>
-            
-            <button type="button" id="btn-open-camera" class="btn btn-outline-success w-100 py-2 fw-bold" onclick="startCamera()" disabled>
-              <i class="fa-solid fa-video me-2"></i>Bật Camera Chụp Ảnh
+          <!-- ================= KHU VỰC CAMERA VÀ SUBMIT (DÙNG CHUNG CHO TÌM KIẾM VÀ THÊM MỚI) ================= -->
+          <div id="camera-and-submit-section">
+            <div class="mb-4 text-center">
+              <label class="form-label fw-bold text-secondary small text-uppercase d-block"><i class="fa-solid fa-camera me-2"></i>Chụp ảnh chân dung trực tiếp</label>
+              
+              <button type="button" id="btn-open-camera" class="btn btn-outline-success w-100 py-2 fw-bold" onclick="startCamera()" disabled>
+                <i class="fa-solid fa-video me-2"></i>Bật Camera 
+              </button>
+
+              <div id="camera-section">
+                <button type="button" class="btn-switch-cam" onclick="switchCamera()" title="Đổi Camera Trước/Sau">
+                  <i class="fa-solid fa-camera-rotate fs-5"></i>
+                </button>
+                <video id="video-stream" class="video-mirror" autoplay playsinline></video>
+                <button type="button" class="btn btn-danger w-100 mt-2 py-3 fw-bold rounded-pill shadow-sm" onclick="captureImage()">
+                  <i class="fa-solid fa-camera-retro me-2 fs-5 align-middle"></i> <span class="align-middle">CHỤP ẢNH NGAY</span>
+                </button>
+              </div>
+              
+              <canvas id="canvas-capture"></canvas>
+              <div id="preview-container" class="mt-3">
+                <img id="preview-img" alt="Thumbnail">
+                <button type="button" class="btn btn-outline-secondary w-100 mt-3 rounded-pill" onclick="retakePhoto()">
+                  <i class="fa-solid fa-rotate-right me-2"></i>Chụp Lại
+                </button>
+              </div>
+            </div>
+
+            <button type="button" id="btn-submit" class="btn btn-bim w-100 btn-lg py-3 rounded-3 shadow mt-1" onclick="submitAllData()" disabled>
+              <i class="fa-solid fa-cloud-arrow-up me-2 fs-5 align-middle"></i> <span class="align-middle">TẢI DỮ LIỆU LÊN HỆ THỐNG</span>
             </button>
-
-            <!-- Video Live Camera -->
-            <div id="camera-section">
-              <button type="button" class="btn-switch-cam" onclick="switchCamera()" title="Đổi Camera Trước/Sau">
-                <i class="fa-solid fa-camera-rotate fs-5"></i>
-              </button>
-              <video id="video-stream" class="video-mirror" autoplay playsinline></video>
-              <button type="button" class="btn btn-danger w-100 mt-2 py-2 fw-bold" onclick="captureImage()">
-                <i class="fa-solid fa-circle-dot me-2"></i>CHỤP ẢNH NGAY
-              </button>
-            </div>
-            
-            <canvas id="canvas-capture"></canvas>
-            <div id="preview-container" class="mt-3">
-              <img id="preview-img" alt="Thumbnail">
-              <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="retakePhoto()">
-                <i class="fa-solid fa-rotate-right me-2"></i>Chụp Lại
-              </button>
-            </div>
           </div>
-
-          <button type="button" id="btn-submit" class="btn btn-bim w-100 btn-lg py-3 rounded-3 shadow-sm mt-3" onclick="submitAllData()" disabled>
-            <i class="fa-solid fa-cloud-arrow-up me-2"></i>TẢI ẢNH LÊN HỆ THỐNG
-          </button>
 
         </div>
       </div>
@@ -153,18 +191,19 @@
   </div>
 
   <script>
-    // THAY LINK SCRIPT CỦA BẠN VÀO ĐÂY (Nhớ copy link Deploy bản mới nhất)
+    // THAY LINK SCRIPT CỦA BẠN VÀO ĐÂY (Cập nhật Deploy mới nhất nhé)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0zv_Y0IByscmRGw3Z3Q52u-E1O-H45h7VBRs2IuepIQtveiFDAiumX6soyqFr1iIU/exec"; 
     
     let globalEmployeeList = []; 
     let base64ImageStr = null;
     let isUserVerified = false;
-    let isAddNewMode = false; // Cờ kiểm tra chế độ
     
+    let currentMode = 'search'; // 'search', 'add', 'list'
     let cameraStream = null;
     let currentFacingMode = "user"; 
 
     function removeVietnameseTones(str) {
+      if(!str) return "";
       str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a");
       str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e");
       str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i");
@@ -196,109 +235,132 @@
     });
 
     // ==========================================
-    // CHUYỂN ĐỔI CHẾ ĐỘ: TÌM KIẾM <-> THÊM MỚI
+    // QUẢN LÝ ĐIỀU HƯỚNG GIAO DIỆN CÁC CHẾ ĐỘ
     // ==========================================
-    function toggleMode() {
-      isAddNewMode = !isAddNewMode;
-      const btnToggle = document.getElementById('btn-toggle-mode');
-      const sectionSearch = document.getElementById('mode-search-section');
-      const sectionAdd = document.getElementById('mode-add-section');
-
-      resetForm(); // Reset sạch form khi đổi chế độ
-
-      if (isAddNewMode) {
-        btnToggle.innerHTML = '<i class="fa-solid fa-magnifying-glass me-1"></i>Quay lại Tìm kiếm';
-        btnToggle.classList.replace('btn-outline-primary', 'btn-outline-secondary');
-        
-        sectionSearch.classList.add('d-none');
-        sectionAdd.classList.remove('d-none');
-      } else {
-        btnToggle.innerHTML = '<i class="fa-solid fa-user-plus me-1"></i>Thêm nhân sự mới';
-        btnToggle.classList.replace('btn-outline-secondary', 'btn-outline-primary');
-        
-        sectionSearch.classList.remove('d-none');
-        sectionAdd.classList.add('d-none');
+    function promptListMode() {
+      const pass = prompt("Yêu cầu nhập mật khẩu bảo mật để truy cập Danh sách:");
+      if (pass === "HRPQ") {
+        setMode('list');
+      } else if (pass !== null) {
+        alert("Mật khẩu không chính xác!");
       }
     }
 
-    // Validate cho Form Thêm Mới
-    function validateNewUser() {
-      if (!isAddNewMode) return;
-      const newId = document.getElementById('new-userId').value.trim();
-      const newName = document.getElementById('new-userName').value.trim();
+    function setMode(mode) {
+      currentMode = mode;
+      resetForm(); // Dọn dẹp form/camera khi chuyển mode
 
-      if (newId !== "" && newName !== "") {
-        isUserVerified = true;
-        document.getElementById('btn-open-camera').disabled = false;
-      } else {
-        isUserVerified = false;
-        document.getElementById('btn-open-camera').disabled = true;
-        stopCamera();
-        document.getElementById('camera-section').style.display = "none";
-      }
-      validateForm();
-    }
-
-
-    function updateMissingCount() {
-      const missingCount = globalEmployeeList.filter(u => !u.hasImage).length;
-      document.getElementById('missing-count').innerText = missingCount;
-      renderMissingList();
-    }
-
-    function toggleMissingList() {
-      const container = document.getElementById('missing-list-container');
-      container.classList.toggle('d-none');
-    }
-
-    function renderMissingList() {
-      const container = document.getElementById('missing-list-container');
-      const missing = globalEmployeeList.filter(u => !u.hasImage);
+      const secSearch = document.getElementById('mode-search-section');
+      const secAdd = document.getElementById('mode-add-section');
+      const secList = document.getElementById('mode-list-section');
+      const secCamSub = document.getElementById('camera-and-submit-section');
+      const heading = document.getElementById('main-heading');
       
-      if(missing.length === 0) {
-        container.innerHTML = `<div class="text-center text-success small py-2"><i class="fa-solid fa-check-circle me-1"></i>Tuyệt vời! Toàn bộ NV đã có ảnh.</div>`;
-        return;
+      const btnBack = document.getElementById('btn-back');
+      const btnAdd = document.getElementById('btn-add');
+      const btnList = document.getElementById('btn-list');
+
+      // Ẩn tất cả trước
+      secSearch.classList.add('d-none');
+      secAdd.classList.add('d-none');
+      secList.classList.add('d-none');
+      secCamSub.classList.add('d-none');
+      btnBack.classList.add('d-none');
+      btnAdd.classList.remove('d-none');
+      btnList.classList.remove('d-none');
+
+      if (mode === 'search') {
+        heading.innerText = "Upload Chấm Công";
+        secSearch.classList.remove('d-none');
+        secCamSub.classList.remove('d-none');
+        btnAdd.classList.remove('d-none'); // Trong màn search thì hiện nút Add
+        
+      } else if (mode === 'add') {
+        heading.innerText = "Thêm Nhân Sự Mới";
+        secAdd.classList.remove('d-none');
+        secCamSub.classList.remove('d-none');
+        btnBack.classList.remove('d-none');
+        btnAdd.classList.add('d-none'); // Đang ở Add thì ẩn nút Add
+        
+      } else if (mode === 'list') {
+        heading.innerText = "Danh Sách Dữ Liệu";
+        secList.classList.remove('d-none');
+        btnBack.classList.remove('d-none');
+        btnList.classList.add('d-none'); // Đang ở List thì ẩn nút List
+        renderList(globalEmployeeList); // Vẽ bảng dữ liệu
       }
-      let html = `<div class="list-group list-group-flush">`;
-      missing.forEach(emp => {
-        html += `
-          <button type="button" class="list-group-item list-group-item-action py-2 px-1 d-flex justify-content-between align-items-center" onclick="selectUser('${emp.id}')">
-            <div>
-              <strong class="text-success">${emp.id}</strong> - ${emp.name}
-              <div class="small text-muted" style="font-size:0.75rem;">${emp.title}</div>
-            </div>
-            <i class="fa-solid fa-chevron-right text-muted small"></i>
-          </button>`;
-      });
-      html += `</div>`;
-      container.innerHTML = html;
     }
 
+    // ==========================================
+    // LOGIC CHẾ ĐỘ DANH SÁCH & TÌM KIẾM LIST
+    // ==========================================
+    function renderList(dataToRender) {
+      const tbody = document.getElementById('list-tbody');
+      let html = '';
+      
+      dataToRender.forEach(emp => {
+        const unaccented = removeVietnameseTones(emp.name);
+        let thumbHtml = '<span class="badge bg-secondary bg-opacity-25 text-secondary">No img</span>';
+        let actionHtml = '-';
+        
+        if (emp.hasImage && emp.imageLink) {
+          // Bóc tách Drive ID từ link gốc
+          const driveIdMatch = emp.imageLink.match(/[-\w]{25,}/);
+          if (driveIdMatch) {
+            const dId = driveIdMatch[0];
+            const thumbUrl = `https://drive.google.com/uc?export=view&id=${dId}`;
+            const dlUrl = `https://drive.google.com/uc?export=download&id=${dId}`;
+            
+            thumbHtml = `<img src="${thumbUrl}" class="img-thumbnail-custom" onerror="this.src='https://via.placeholder.com/45?text=Lỗi'">`;
+            actionHtml = `<a href="${dlUrl}" target="_blank" class="btn btn-sm btn-success rounded-circle shadow-sm" title="Tải xuống ảnh gốc"><i class="fa-solid fa-cloud-arrow-down"></i></a>`;
+          }
+        }
+        
+        html += `
+        <tr>
+          <td class="text-center">${thumbHtml}</td>
+          <td class="fw-bold text-success">${emp.id}</td>
+          <td class="fw-semibold">${emp.name}</td>
+          <td class="text-muted small">${unaccented}</td>
+          <td class="text-center">${actionHtml}</td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function filterList() {
+      const query = removeVietnameseTones(document.getElementById('listSearch').value.toLowerCase());
+      const filtered = globalEmployeeList.filter(emp => {
+        return removeVietnameseTones(emp.id.toLowerCase()).includes(query) || 
+               removeVietnameseTones(emp.name.toLowerCase()).includes(query);
+      });
+      renderList(filtered);
+    }
+
+    // ==========================================
+    // LOGIC TÌM KIẾM (CHẾ ĐỘ MẶC ĐỊNH)
+    // ==========================================
     function handleSearchInput(queryValue) {
       const inputStr = removeVietnameseTones(queryValue.trim().toLowerCase());
       const suggestionBox = document.getElementById('suggestion-box');
       
-      if (!inputStr) {
-        suggestionBox.classList.add('d-none');
-        return;
-      }
+      if (!inputStr) { suggestionBox.classList.add('d-none'); return; }
+
       const matches = globalEmployeeList.filter(emp => 
         removeVietnameseTones(emp.id.toLowerCase()).includes(inputStr) || 
         removeVietnameseTones(emp.name.toLowerCase()).includes(inputStr)
       ).slice(0, 6); 
 
-      if (matches.length === 0) {
-        suggestionBox.classList.add('d-none');
-        return;
-      }
+      if (matches.length === 0) { suggestionBox.classList.add('d-none'); return; }
+      
       let innerHtml = '';
       matches.forEach(emp => {
-        let iconHtml = emp.hasImage ? `<span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1" style="font-size:0.7rem;"><i class="fa-solid fa-check me-1"></i>Đã có ảnh</span>` : `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 py-1" style="font-size:0.7rem;">Chưa có</span>`;
+        let iconHtml = emp.hasImage ? `<span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1"><i class="fa-solid fa-check me-1"></i>Đã có</span>` : `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 py-1">Chưa có</span>`;
         innerHtml += `
           <div class="suggestion-row" onclick="selectUser('${emp.id}')">
             <div>
               <strong class="text-success">${emp.id}</strong> — <span class="fw-semibold">${emp.name}</span> 
-              <span class="text-muted d-block small" style="font-size:0.78rem;">Chức danh: ${emp.title}</span>
+              <span class="text-muted d-block small" style="font-size:0.75rem;">${emp.title}</span>
             </div>
             <div>${iconHtml}</div>
           </div>`;
@@ -321,11 +383,8 @@
       document.getElementById('btn-open-camera').disabled = false;
       
       const feedback = document.getElementById('search-feedback');
-      if (user.hasImage) {
-        feedback.innerHTML = '<span class="badge bg-warning text-dark status-badge"><i class="fa-solid fa-user-check me-1"></i>Hệ thống đã có ảnh thẻ</span>';
-      } else {
-        feedback.innerHTML = '<span class="badge bg-success status-badge"><i class="fa-solid fa-circle-check me-1"></i>Hợp lệ (Chưa có ảnh)</span>';
-      }
+      if (user.hasImage) feedback.innerHTML = '<span class="badge bg-warning text-dark status-badge"><i class="fa-solid fa-user-check me-1"></i>Đã có ảnh thẻ</span>';
+      else feedback.innerHTML = '<span class="badge bg-success status-badge"><i class="fa-solid fa-circle-check me-1"></i>Hợp lệ (Chưa có)</span>';
       
       stopCamera();
       document.getElementById('preview-container').style.display = "none";
@@ -333,14 +392,57 @@
       validateForm();
     }
 
+    function updateMissingCount() {
+      const missingCount = globalEmployeeList.filter(u => !u.hasImage).length;
+      document.getElementById('missing-count').innerText = missingCount;
+      const container = document.getElementById('missing-list-container');
+      
+      const missing = globalEmployeeList.filter(u => !u.hasImage);
+      if(missing.length === 0) {
+        container.innerHTML = `<div class="text-center text-success small py-2"><i class="fa-solid fa-check-circle me-1"></i>Toàn bộ đã có ảnh.</div>`;
+        return;
+      }
+      let html = `<div class="list-group list-group-flush">`;
+      missing.forEach(emp => {
+        html += `<button type="button" class="list-group-item list-group-item-action py-2 px-2 d-flex justify-content-between align-items-center" onclick="selectUser('${emp.id}')">
+            <div><strong class="text-success">${emp.id}</strong> - ${emp.name}</div><i class="fa-solid fa-chevron-right text-muted small"></i></button>`;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function toggleMissingList() { document.getElementById('missing-list-container').classList.toggle('d-none'); }
+
+    // Đóng dropdown khi click ra ngoài
     document.addEventListener('click', function(e) {
       const inputEl = document.getElementById('userId');
       const boxEl = document.getElementById('suggestion-box');
-      if (!inputEl.contains(e.target) && !boxEl.contains(e.target)) boxEl.classList.add('d-none');
+      if (inputEl && boxEl && !inputEl.contains(e.target) && !boxEl.contains(e.target)) boxEl.classList.add('d-none');
     });
 
     // ==========================================
-    // LOGIC CAMERA TRỰC TIẾP (YÊU CẦU ĐỘ PHÂN GIẢI CAO)
+    // LOGIC THÊM MỚI
+    // ==========================================
+    function validateNewUser() {
+      if (currentMode !== 'add') return;
+      const newId = document.getElementById('new-userId').value.trim();
+      const newName = document.getElementById('new-userName').value.trim();
+
+      if (newId !== "" && newName !== "") {
+        isUserVerified = true;
+        document.getElementById('btn-open-camera').disabled = false;
+      } else {
+        isUserVerified = false;
+        document.getElementById('btn-open-camera').disabled = true;
+        stopCamera();
+        document.getElementById('camera-section').style.display = "none";
+      }
+      validateForm();
+    }
+
+
+    // ==========================================
+    // LOGIC CAMERA TRỰC TIẾP CHẤT LƯỢNG CAO
     // ==========================================
     const videoElement = document.getElementById('video-stream');
     const canvasElement = document.getElementById('canvas-capture');
@@ -356,32 +458,17 @@
 
     function startStream() {
       stopCamera();
-      
-      // BẮT BUỘC ĐỘ PHÂN GIẢI GỐC CAO NHẤT THIẾT BỊ HỖ TRỢ
-      const constraints = {
-        video: {
-          facingMode: currentFacingMode,
-          width: { ideal: 4096 }, // Ép phần cứng đưa ra mức phân giải lớn nhất (sẽ tự tụt xuống 1080p nếu máy ko hỗ trợ 4k)
-          height: { ideal: 2160 } 
-        }
-      };
-
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then(stream => {
+      const constraints = { video: { facingMode: currentFacingMode, width: { ideal: 4096 }, height: { ideal: 2160 } } };
+      navigator.mediaDevices.getUserMedia(constraints).then(stream => {
           cameraStream = stream;
           videoElement.srcObject = stream;
-          
-          if (currentFacingMode === "user") {
-            videoElement.classList.add('video-mirror');
-          } else {
-            videoElement.classList.remove('video-mirror');
-          }
-        })
-        .catch(err => {
-          alert("Lỗi: Không thể truy cập Camera hoặc phần cứng không hỗ trợ. Vui lòng kiểm tra quyền trình duyệt!");
+          if (currentFacingMode === "user") videoElement.classList.add('video-mirror');
+          else videoElement.classList.remove('video-mirror');
+      }).catch(err => {
+          alert("Lỗi truy cập Camera. Vui lòng cấp quyền!");
           document.getElementById('btn-open-camera').style.display = "block";
           document.getElementById('camera-section').style.display = "none";
-        });
+      });
     }
 
     function switchCamera() {
@@ -391,43 +478,27 @@
 
     function captureImage() {
       if(!cameraStream) return;
-      
-      // Sử dụng đúng kích thước phân giải thực của Video stream (độ phân giải cao)
       canvasElement.width = videoElement.videoWidth;
       canvasElement.height = videoElement.videoHeight;
       const ctx = canvasElement.getContext('2d');
-      
-      if (currentFacingMode === "user") {
-        ctx.translate(canvasElement.width, 0);
-        ctx.scale(-1, 1);
-      }
-      
+      if (currentFacingMode === "user") { ctx.translate(canvasElement.width, 0); ctx.scale(-1, 1); }
       ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
       
-      // LƯU ẢNH CHẤT LƯỢNG CAO NHẤT (1.0 = Không giảm chất lượng)
       base64ImageStr = canvasElement.toDataURL('image/jpeg', 1.0); 
       
       document.getElementById('preview-img').src = base64ImageStr;
       document.getElementById('camera-section').style.display = "none";
       document.getElementById('preview-container').style.display = "block";
-      
       stopCamera();
       validateForm();
     }
 
-    function retakePhoto() {
-      startCamera();
-    }
+    function retakePhoto() { startCamera(); }
+    function stopCamera() { if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); cameraStream = null; } }
 
-    function stopCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
-        cameraStream = null;
-      }
-    }
 
     // ==========================================
-    // LOGIC SUBMIT & RESET
+    // LOGIC GỬI DỮ LIỆU
     // ==========================================
     function validateForm() {
       const btnSubmit = document.getElementById('btn-submit');
@@ -436,13 +507,12 @@
 
     function submitAllData() {
       if (!isUserVerified || !base64ImageStr) return;
-      showLoading("Đang tải hình ảnh lên Google Drive và ghi vào Sheet...");
+      showLoading("Hệ thống đang tải dữ liệu lên Drive...");
       
-      // Lấy dữ liệu tùy theo chế độ đang chọn
       const payload = {
-        id: isAddNewMode ? document.getElementById('new-userId').value.trim() : document.getElementById('userId').value.trim(),
-        name: isAddNewMode ? document.getElementById('new-userName').value.trim() : "",
-        isNew: isAddNewMode, // Đánh dấu là Thêm mới
+        id: currentMode === 'add' ? document.getElementById('new-userId').value.trim() : document.getElementById('userId').value.trim(),
+        name: currentMode === 'add' ? document.getElementById('new-userName').value.trim() : "",
+        isNew: (currentMode === 'add'),
         image: base64ImageStr
       };
 
@@ -457,20 +527,25 @@
         if(res.success) {
           alert(res.msg);
           
-          if (!isAddNewMode) {
+          if (currentMode !== 'add') {
             const userIndex = globalEmployeeList.findIndex(u => u.id === payload.id);
-            if(userIndex > -1) globalEmployeeList[userIndex].hasImage = true;
-            updateMissingCount();
+            if(userIndex > -1) {
+              globalEmployeeList[userIndex].hasImage = true;
+              if (res.fileUrl) globalEmployeeList[userIndex].imageLink = res.fileUrl; // Cập nhật link ảnh mới
+            }
           } else {
-            // Nếu thêm mới thành công, push tạm vào biến bộ nhớ local
-            globalEmployeeList.push({ id: payload.id, name: payload.name, title: "", hasImage: true });
+            // Thêm mới thành công, nhét thẳng vào local variables để List thấy được liền
+            globalEmployeeList.push({ id: payload.id, name: payload.name, title: "", hasImage: true, imageLink: res.fileUrl });
           }
-          resetForm();
-        } else alert("Thất bại: " + res.msg);
+          updateMissingCount();
+          
+          // Trả về màn Search
+          setMode('search');
+        } else alert("Lỗi: " + res.msg);
       })
       .catch(err => {
         hideLoading();
-        alert("Lỗi đường truyền hoặc máy chủ.");
+        alert("Lỗi đường truyền internet.");
       });
     }
 
@@ -484,6 +559,9 @@
       // Clear Form Thêm Mới
       document.getElementById('new-userId').value = "";
       document.getElementById('new-userName').value = "";
+      
+      // Clear ô Search trong danh sách List
+      document.getElementById('listSearch').value = "";
       
       base64ImageStr = null;
       isUserVerified = false;
@@ -501,7 +579,6 @@
       document.getElementById('loading-text').innerText = text;
       document.getElementById('loading').classList.remove('d-none');
     }
-
     function hideLoading() { document.getElementById('loading').classList.add('d-none'); }
   </script>
 </body>
