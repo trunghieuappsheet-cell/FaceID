@@ -11,15 +11,36 @@
     :root { --bim-green: #0A7036; --bim-green-dark: #054a22; --neutral-bg: #f4f6f8; }
     body { background-color: var(--neutral-bg); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333333; padding-top: 20px; }
     .main-card { border: none; border-top: 6px solid var(--bim-green); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); background: #ffffff; }
-    .logo-box img { max-height: 45px; margin-bottom: 12px; }
-    .main-title { color: var(--bim-green); font-weight: 800; font-size: 1.4rem; letter-spacing: 0.5px; }
+    
+    .logo-box img { max-height: 45px; }
+    .main-title { color: var(--bim-green); font-weight: 800; font-size: 1.3rem; letter-spacing: 0.5px; }
+    
     .btn-bim { background-color: var(--bim-green); color: white; border: none; font-weight: 600; transition: all 0.3s ease; }
     .btn-bim:hover { background-color: var(--bim-green-dark); color: white; }
     .btn-bim:disabled { background-color: #a3cca9; color: #ffffff; }
     
-    /* Giao diện Toolbar */
-    .toolbar-icons .btn { border-radius: 50%; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-left: 8px; transition: all 0.2s;}
-    .toolbar-icons .btn:hover { transform: translateY(-2px); }
+    /* Giao diện Toolbar Icons - Căn chỉnh màu sắc chuẩn BIM, nhỏ hơn */
+    .toolbar-icons .btn { 
+      border-radius: 50%; 
+      width: 32px; 
+      height: 32px; 
+      padding: 0;
+      font-size: 0.85rem;
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      margin-left: 6px; 
+      color: var(--bim-green);
+      border: 1px solid var(--bim-green);
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+    .toolbar-icons .btn:hover { 
+      background-color: var(--bim-green);
+      color: #ffffff;
+      transform: translateY(-2px); 
+      box-shadow: 0 3px 8px rgba(10, 112, 54, 0.3);
+    }
 
     .search-wrapper { position: relative; }
     .suggestion-container { position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border-radius: 0 0 8px 8px; background: #ffffff; border: 1px solid #ced4da; border-top: none; }
@@ -62,25 +83,28 @@
       <div class="col-md-10 col-lg-8">
         <div class="card main-card p-4">
           
-          <!-- Thanh công cụ (Toolbar Icons) -->
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="logo-box m-0"><img src="https://i.postimg.cc/LYY6ZpCQ/logobe.png" alt="BIM Group"></div>
-            <div class="toolbar-icons">
-              <button class="btn btn-outline-secondary d-none" id="btn-back" onclick="setMode('search')" title="Quay lại Trang chủ">
+          <!-- Wrapper Logo & Toolbar Icons -->
+          <div class="position-relative text-center mb-4 mt-2">
+            <!-- Toolbar góc phải (position absolute) -->
+            <div class="toolbar-icons position-absolute top-0 end-0">
+              <button class="btn d-none" id="btn-back" onclick="setMode('search')" title="Quay lại Trang chủ">
                 <i class="fa-solid fa-arrow-left"></i>
               </button>
-              <button class="btn btn-outline-primary" id="btn-add" onclick="setMode('add')" title="Thêm nhân sự mới">
+              <button class="btn" id="btn-add" onclick="setMode('add')" title="Thêm nhân sự mới">
                 <i class="fa-solid fa-user-plus"></i>
               </button>
-              <button class="btn btn-outline-info" id="btn-list" onclick="promptListMode()" title="Xem danh sách">
+              <button class="btn" id="btn-list" onclick="promptListMode()" title="Xem danh sách">
                 <i class="fa-solid fa-list"></i>
               </button>
             </div>
+            
+            <!-- Logo & Tiêu đề canh giữa -->
+            <div class="logo-box mb-2">
+              <img src="https://i.postimg.cc/LYY6ZpCQ/logobe.png" alt="BIM Group">
+            </div>
+            <h2 class="main-title text-uppercase m-0" id="main-heading">Upload Chấm Công</h2>
           </div>
-          
-          <div class="text-center mb-3">
-            <h2 class="main-title text-uppercase" id="main-heading">Upload Chấm Công</h2>
-          </div>
+
           <hr class="text-muted opacity-25 mb-4">
           
           <!-- ================= 1. CHẾ ĐỘ TÌM KIẾM (MẶC ĐỊNH) ================= -->
@@ -114,7 +138,7 @@
           </div>
 
           <!-- ================= 2. CHẾ ĐỘ THÊM MỚI ================= -->
-          <div id="mode-add-section" class="d-none mb-4 p-4 rounded-3 bg-white shadow-sm border border-primary border-opacity-25">
+          <div id="mode-add-section" class="d-none mb-4 p-4 rounded-3 bg-white shadow-sm border border-success border-opacity-25">
             <div class="mb-3">
               <label class="form-label fw-bold text-secondary small">Mã nhân viên (MNV) <span class="text-danger">*</span></label>
               <input type="text" id="new-userId" class="form-control bg-light" placeholder="VD: BIM12345" oninput="validateNewUser()">
@@ -140,8 +164,8 @@
                     <th class="text-center">Hình ảnh</th>
                     <th>MNV</th>
                     <th>Họ tên</th>
-                    <th>Họ tên không dấu</th>
-                    <th class="text-center">Thao tác</th>
+                    <th>Tên không dấu</th>
+                    <th class="text-center">Tải xuống</th>
                   </tr>
                 </thead>
                 <tbody id="list-tbody">
@@ -151,8 +175,7 @@
             </div>
           </div>
 
-
-          <!-- ================= KHU VỰC CAMERA VÀ SUBMIT (DÙNG CHUNG CHO TÌM KIẾM VÀ THÊM MỚI) ================= -->
+          <!-- ================= KHU VỰC CAMERA VÀ SUBMIT ================= -->
           <div id="camera-and-submit-section">
             <div class="mb-4 text-center">
               <label class="form-label fw-bold text-secondary small text-uppercase d-block"><i class="fa-solid fa-camera me-2"></i>Chụp ảnh chân dung trực tiếp</label>
@@ -235,10 +258,10 @@
     });
 
     // ==========================================
-    // QUẢN LÝ ĐIỀU HƯỚNG GIAO DIỆN CÁC CHẾ ĐỘ
+    // QUẢN LÝ ĐIỀU HƯỚNG GIAO DIỆN
     // ==========================================
     function promptListMode() {
-      const pass = prompt("Yêu cầu nhập mật khẩu bảo mật để truy cập Danh sách:");
+      const pass = prompt("Nhập mật khẩu bảo mật (HRPQ):");
       if (pass === "HRPQ") {
         setMode('list');
       } else if (pass !== null) {
@@ -248,7 +271,7 @@
 
     function setMode(mode) {
       currentMode = mode;
-      resetForm(); // Dọn dẹp form/camera khi chuyển mode
+      resetForm(); 
 
       const secSearch = document.getElementById('mode-search-section');
       const secAdd = document.getElementById('mode-add-section');
@@ -273,26 +296,25 @@
         heading.innerText = "Upload Chấm Công";
         secSearch.classList.remove('d-none');
         secCamSub.classList.remove('d-none');
-        btnAdd.classList.remove('d-none'); // Trong màn search thì hiện nút Add
         
       } else if (mode === 'add') {
         heading.innerText = "Thêm Nhân Sự Mới";
         secAdd.classList.remove('d-none');
         secCamSub.classList.remove('d-none');
         btnBack.classList.remove('d-none');
-        btnAdd.classList.add('d-none'); // Đang ở Add thì ẩn nút Add
+        btnAdd.classList.add('d-none'); 
         
       } else if (mode === 'list') {
         heading.innerText = "Danh Sách Dữ Liệu";
         secList.classList.remove('d-none');
         btnBack.classList.remove('d-none');
-        btnList.classList.add('d-none'); // Đang ở List thì ẩn nút List
-        renderList(globalEmployeeList); // Vẽ bảng dữ liệu
+        btnList.classList.add('d-none'); 
+        renderList(globalEmployeeList); 
       }
     }
 
     // ==========================================
-    // LOGIC CHẾ ĐỘ DANH SÁCH & TÌM KIẾM LIST
+    // LOGIC CHẾ ĐỘ DANH SÁCH (ẢNH THU NHỎ HOẠT ĐỘNG TỐT)
     // ==========================================
     function renderList(dataToRender) {
       const tbody = document.getElementById('list-tbody');
@@ -300,7 +322,7 @@
       
       dataToRender.forEach(emp => {
         const unaccented = removeVietnameseTones(emp.name);
-        let thumbHtml = '<span class="badge bg-secondary bg-opacity-25 text-secondary">No img</span>';
+        let thumbHtml = '<span class="badge bg-secondary bg-opacity-25 text-secondary">Trống</span>';
         let actionHtml = '-';
         
         if (emp.hasImage && emp.imageLink) {
@@ -308,11 +330,12 @@
           const driveIdMatch = emp.imageLink.match(/[-\w]{25,}/);
           if (driveIdMatch) {
             const dId = driveIdMatch[0];
-            const thumbUrl = `https://drive.google.com/uc?export=view&id=${dId}`;
+            // Sử dụng API Thumbnail của Google Drive để tránh lỗi hiển thị ảnh
+            const thumbUrl = `https://drive.google.com/thumbnail?id=${dId}&sz=w100`;
             const dlUrl = `https://drive.google.com/uc?export=download&id=${dId}`;
             
-            thumbHtml = `<img src="${thumbUrl}" class="img-thumbnail-custom" onerror="this.src='https://via.placeholder.com/45?text=Lỗi'">`;
-            actionHtml = `<a href="${dlUrl}" target="_blank" class="btn btn-sm btn-success rounded-circle shadow-sm" title="Tải xuống ảnh gốc"><i class="fa-solid fa-cloud-arrow-down"></i></a>`;
+            thumbHtml = `<img src="${thumbUrl}" class="img-thumbnail-custom" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';"><span style="display:none;" class="badge bg-warning">Lỗi</span>`;
+            actionHtml = `<a href="${dlUrl}" target="_blank" class="btn btn-sm btn-outline-success rounded-circle shadow-sm" title="Tải xuống ảnh gốc"><i class="fa-solid fa-cloud-arrow-down"></i></a>`;
           }
         }
         
@@ -338,7 +361,7 @@
     }
 
     // ==========================================
-    // LOGIC TÌM KIẾM (CHẾ ĐỘ MẶC ĐỊNH)
+    // LOGIC TÌM KIẾM
     // ==========================================
     function handleSearchInput(queryValue) {
       const inputStr = removeVietnameseTones(queryValue.trim().toLowerCase());
@@ -531,15 +554,12 @@
             const userIndex = globalEmployeeList.findIndex(u => u.id === payload.id);
             if(userIndex > -1) {
               globalEmployeeList[userIndex].hasImage = true;
-              if (res.fileUrl) globalEmployeeList[userIndex].imageLink = res.fileUrl; // Cập nhật link ảnh mới
+              if (res.fileUrl) globalEmployeeList[userIndex].imageLink = res.fileUrl;
             }
           } else {
-            // Thêm mới thành công, nhét thẳng vào local variables để List thấy được liền
             globalEmployeeList.push({ id: payload.id, name: payload.name, title: "", hasImage: true, imageLink: res.fileUrl });
           }
           updateMissingCount();
-          
-          // Trả về màn Search
           setMode('search');
         } else alert("Lỗi: " + res.msg);
       })
@@ -550,17 +570,12 @@
     }
 
     function resetForm() {
-      // Clear Form Tìm Kiếm
       document.getElementById('userId').value = "";
       document.getElementById('txt-name').innerText = "-";
       document.getElementById('txt-title').innerText = "-";
       document.getElementById('search-feedback').innerHTML = "";
-      
-      // Clear Form Thêm Mới
       document.getElementById('new-userId').value = "";
       document.getElementById('new-userName').value = "";
-      
-      // Clear ô Search trong danh sách List
       document.getElementById('listSearch').value = "";
       
       base64ImageStr = null;
